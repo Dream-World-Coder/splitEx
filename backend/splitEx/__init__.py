@@ -13,7 +13,7 @@ def create_app(configs_dictionary_key="dev"):
 
     # cors
     cors = CORS()
-    cors.init_app(app, origins=["http://localhost:5173","http://127.0.0.1:5173"])
+    cors.init_app(app, origins=["http://localhost:5173","http://127.0.0.1:5173","https://splitexx.netlify.app"])
 
     # jwt
     JWTManager(app)

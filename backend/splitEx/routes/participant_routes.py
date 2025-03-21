@@ -16,34 +16,34 @@ def add_participant(expense_id):
     data = request.get_json()
 
     try:
-        # Validate required fields
+        #validate required fields
         required_fields = ['username']
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
-        # Get the expense
+        #get the expense
         expense = Expense.query.get(uuid.UUID(expense_id))
         if not expense:
             return jsonify({'error': 'Expense not found'}), 404
 
-        # Check if current user is the payer or a participant
+        #check if current user is the payer or a participant
         if str(expense.payer_id) != user_id and not any(str(user.id) == user_id for user in expense.users):
             return jsonify({'error': 'You do not have permission to add participants to this expense'}), 403
 
-        # Find the user to add
+        #find the user to add
         participant_user = User.query.filter_by(username=data['username']).first()
         if not participant_user:
             return jsonify({'error': f'User {data["username"]} not found'}), 404
 
-        # Check if user is already a participant
+        #check if user is already a participant
         if any(user.id == participant_user.id for user in expense.users):
             return jsonify({'error': f'User {data["username"]} is already a participant'}), 400
 
-        # Add user to expense participants
+        #add user to expense participants
         expense.users.append(participant_user)
 
-        # Create participant entry with amount
+        #create participant entry with amount
         amount = data.get('amount', 0)
         if expense.split_method == SplitMethod.EQUAL:
             # Recalculate equal amounts for all participants
@@ -54,7 +54,7 @@ def add_participant(expense_id):
             for participant in expense.participants:
                 participant.amount = equal_amount
 
-            # Create new participant with equal amount
+            #create new participant with equal amount
             participant = ExpenseParticipant(
                 expense_id=expense.id,
                 user_id=participant_user.id,
@@ -62,7 +62,7 @@ def add_participant(expense_id):
                 item=data.get('item')
             )
         else:
-            # For unequal split, use the specified amount
+            #for unequal split, use the specified amount
             participant = ExpenseParticipant(
                 expense_id=expense.id,
                 user_id=participant_user.id,
