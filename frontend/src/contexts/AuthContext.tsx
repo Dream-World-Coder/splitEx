@@ -7,7 +7,7 @@ import {
     ReactNode,
 } from "react";
 import { toast } from "sonner";
-import authAxios from "@/services/AuthAxios";
+import authAxios from "@/services/authAxios";
 
 // types
 interface User {

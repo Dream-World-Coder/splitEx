@@ -1,4 +1,4 @@
-import authAxios from "./AuthAxios";
+import authAxios from "./authAxios";
 
 // type
 export interface User {
