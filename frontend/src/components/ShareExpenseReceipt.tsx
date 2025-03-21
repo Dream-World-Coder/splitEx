@@ -227,24 +227,31 @@ const ShareExpenseReceipt: React.FC<ShareExpenseReceiptProps> = ({
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Person</TableHead>
-                                        <TableHead>Item</TableHead>
+                                        <TableHead>
+                                            {currentExpense?.participants[0]
+                                                .item && "Item"}
+                                        </TableHead>
                                         <TableHead className="text-right">
                                             Amount
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {currentExpense?.entries?.map(
-                                        (entry, index) => (
+                                    {currentExpense?.participants?.map(
+                                        (participant, index) => (
                                             <TableRow key={index}>
                                                 <TableCell>
-                                                    {entry.person}
+                                                    {participant.username}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {entry.item}
+                                                    {participant.item &&
+                                                        participant.item}
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    ${entry.amount.toFixed(2)}
+                                                    ₹
+                                                    {participant.amount.toFixed(
+                                                        2,
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ),
@@ -259,7 +266,7 @@ const ShareExpenseReceipt: React.FC<ShareExpenseReceiptProps> = ({
                                         <TableCell className="text-right font-bold">
                                             ₹
                                             {calculateTotal(
-                                                currentExpense?.entries,
+                                                currentExpense?.participants,
                                             ).toFixed(2)}
                                         </TableCell>
                                     </TableRow>
@@ -270,24 +277,24 @@ const ShareExpenseReceipt: React.FC<ShareExpenseReceiptProps> = ({
                                 <h3 className="font-medium">
                                     Summary by Person
                                 </h3>
-                                {getUniquePersons(currentExpense?.entries).map(
-                                    (person) => (
-                                        <div
-                                            key={person}
-                                            className="flex justify-between"
-                                        >
-                                            <span>{person}</span>
-                                            <span>
-                                                ₹
-                                                {calculatePersonTotal(
-                                                    currentExpense?.entries ??
-                                                        [],
-                                                    person,
-                                                ).toFixed(2)}
-                                            </span>
-                                        </div>
-                                    ),
-                                )}
+                                {getUniquePersons(
+                                    currentExpense?.participants,
+                                ).map((person) => (
+                                    <div
+                                        key={person}
+                                        className="flex justify-between"
+                                    >
+                                        <span>{person}</span>
+                                        <span>
+                                            ₹
+                                            {calculatePersonTotal(
+                                                currentExpense?.participants ??
+                                                    [],
+                                                person,
+                                            ).toFixed(2)}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </CardContent>
                     </Card>

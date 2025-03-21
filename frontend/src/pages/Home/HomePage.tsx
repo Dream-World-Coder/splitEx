@@ -28,23 +28,21 @@ import { Header, QuickStats, QuickOptions, BottomDrawer } from "./components";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
-    const { currentUser, token, refreshUser, login, logout } = useAuth();
+    const { currentUser } = useAuth();
 
     const [isShareSheetOpen, setIsShareSheetOpen] = useState<boolean>(false);
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [currentExpense, setCurrentExpense] = useState<Expense | null>(null);
-    const [activeTab, setActiveTab] = useState<"expenses" | "summary">(
-        "expenses",
-    );
+    const [, setActiveTab] = useState<"expenses" | "summary">("expenses");
 
-    // Fetch all expenses when component mounts
+    //fetching all expenses when component mounts
     useEffect(() => {
         fetchExpenses();
     }, []);
 
-    // Fetch expenses from the API
+    //fetching expenses api
     const fetchExpenses = async () => {
         setIsLoading(true);
         try {
@@ -60,7 +58,7 @@ const HomePage: React.FC = () => {
         }
     };
 
-    // Calculate total amount for an expense
+    //calculate total amount for an expense
     const calculateTotal = (
         participants: Participant[] | undefined,
     ): number => {
@@ -72,7 +70,7 @@ const HomePage: React.FC = () => {
         );
     };
 
-    // Calculate total amount per person
+    //calculate total amount per person
     const calculatePersonTotal = (
         participants: Participant[],
         username: string,
@@ -82,7 +80,7 @@ const HomePage: React.FC = () => {
             .reduce((sum, participant) => sum + participant.amount, 0);
     };
 
-    // Get unique persons from participants
+    //get unique persons from participants
     const getUniquePersons = (
         participants: Participant[] | undefined,
     ): string[] => {
@@ -93,13 +91,14 @@ const HomePage: React.FC = () => {
         ];
     };
 
-    // Handle sharing an expense
+    //handle sharing an expense
     const handleShareReceipt = (expense: Expense) => {
         setCurrentExpense(expense);
         setIsShareSheetOpen(true);
     };
 
-    // Handle deleting an expense
+    /*
+    //handle deleting an expense
     const handleDeleteExpense = async (expenseId: string) => {
         try {
             await dataService.expenses.deleteExpense(expenseId);
@@ -112,13 +111,14 @@ const HomePage: React.FC = () => {
             toast.error("Failed to delete expense");
         }
     };
+    */
 
-    // Handle navigating to create expense page
+    //handle navigating to create expense page
     const handleCreateExpense = () => {
         navigate("/create-expense");
     };
 
-    // Handle navigating to expense detail page
+    //handle navigating to expense detail page
     const handleViewExpenseDetail = (expenseId: string) => {
         navigate(`/expense/${expenseId}`);
     };
@@ -126,8 +126,8 @@ const HomePage: React.FC = () => {
     return (
         <div className="bg-gray-50 min-h-screen p-4 max-w-md mx-auto">
             <Header />
-            <QuickStats expenses={expenses} />
-            <QuickOptions onCreateExpense={handleCreateExpense} />
+            <QuickStats />
+            <QuickOptions />
 
             <Tabs
                 defaultValue="expenses"
@@ -147,7 +147,18 @@ const HomePage: React.FC = () => {
                             Loading expenses...
                         </div>
                     ) : error ? (
-                        <div className="text-red-500 p-4">{error}</div>
+                        <div className="text-red-500 p-4 grid place-items-center">
+                            {currentUser ? (
+                                error
+                            ) : (
+                                <a
+                                    href="/login"
+                                    className="text-black underline"
+                                >
+                                    Log In first
+                                </a>
+                            )}
+                        </div>
                     ) : expenses.length === 0 ? (
                         <div className="text-center p-6">
                             <p className="mb-4">
@@ -295,7 +306,7 @@ const HomePage: React.FC = () => {
             </Tabs>
 
             {/* bottom drawer */}
-            <BottomDrawer onCreateExpense={handleCreateExpense} />
+            <BottomDrawer />
 
             {/* share receipt -> using `sheet` */}
             <ShareExpenseReceipt

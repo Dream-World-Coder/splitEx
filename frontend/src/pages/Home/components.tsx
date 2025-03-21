@@ -22,8 +22,11 @@ import {
     DrawerTrigger,
 } from "@/components/ui/drawer";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 export const Header: React.FC = () => {
     const navigate = useNavigate();
+    const { currentUser } = useAuth();
 
     return (
         <header className="flex justify-between items-center mb-6">
@@ -35,13 +38,20 @@ export const Header: React.FC = () => {
             </div>
             <div className="flex items-center justify-center gap-2">
                 {/* account */}
-                <Avatar onClick={() => navigate("/profile")}>
-                    <AvatarImage
-                        src="https://opencanvas.blog/defaults/profile_1.jpeg"
-                        alt="@user"
-                    />
-                    <AvatarFallback>SG</AvatarFallback>
-                </Avatar>
+                {currentUser ? (
+                    <Avatar onClick={() => navigate("/profile")}>
+                        <AvatarImage
+                            src="https://opencanvas.blog/defaults/profile_1.jpeg"
+                            alt="@user"
+                        />
+                        <AvatarFallback>SG</AvatarFallback>
+                    </Avatar>
+                ) : (
+                    <div
+                        className="bg-gray-200 size-9 rounded-full"
+                        onClick={() => navigate("/login")}
+                    ></div>
+                )}
 
                 {/* menubar */}
                 <Sheet>

@@ -7,6 +7,7 @@ import { ProtectedRoute } from "./components/ProtectedRoutes";
 
 import HomePage from "./pages/Home/HomePage";
 import CreateEditExpense from "./pages/Expenses/CreateExpense";
+import ViewExpense from "./pages/Expenses/ViewExpense";
 
 import Profile from "./pages/Profile/Profile";
 
@@ -23,15 +24,20 @@ const App: React.FC = () => {
         <Router>
             <AuthProvider>
                 <Routes>
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/Register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
                     <Route element={<ProtectedRoute />}>
-                        <Route path="/" element={<HomePage />} />
                         <Route path="/home" element={<HomePage />} />
+                        <Route path="/expenses" element={<HomePage />} />
                         <Route
                             path="/create-expense"
                             element={<CreateEditExpense />}
+                        />
+                        <Route
+                            path="/expense/:expenseId"
+                            element={<ViewExpense />}
                         />
                         <Route path="/profile" element={<Profile />} />
                     </Route>

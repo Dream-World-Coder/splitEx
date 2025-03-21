@@ -58,21 +58,21 @@ export interface UpdateParticipantPayload {
     item?: string;
 }
 
-// Expense service functions
+// Expense related functions
 const expenseService = {
-    // Get all expenses for current user
+    // get all expenses for current user
     getAllExpenses: async (): Promise<Expense[]> => {
         const response = await authAxios.get("/expenses/");
         return response.data;
     },
 
-    // Get a specific expense by ID
+    // get a specific expense by ID
     getExpenseById: async (expenseId: string): Promise<Expense> => {
         const response = await authAxios.get(`/expenses/${expenseId}`);
         return response.data;
     },
 
-    // Create a new expense
+    // create a new expense
     createExpense: async (
         expenseData: CreateExpensePayload,
     ): Promise<string> => {
@@ -80,7 +80,7 @@ const expenseService = {
         return response.data.expense_id;
     },
 
-    // Update an existing expense
+    // update an existing expense
     updateExpense: async (
         expenseId: string,
         expenseData: UpdateExpensePayload,
@@ -88,15 +88,15 @@ const expenseService = {
         await authAxios.put(`/expenses/${expenseId}`, expenseData);
     },
 
-    // Delete an expense
+    // delete an expense
     deleteExpense: async (expenseId: string): Promise<void> => {
         await authAxios.delete(`/expenses/${expenseId}`);
     },
 };
 
-// Participant service functions
+// participant related
 const participantService = {
-    // Get all participants for an expense
+    // get all participants for an expense
     getExpenseParticipants: async (
         expenseId: string,
     ): Promise<Participant[]> => {
@@ -106,7 +106,7 @@ const participantService = {
         return response.data;
     },
 
-    // Add a participant to an expense
+    // add a participant to an expense
     addParticipant: async (
         expenseId: string,
         participantData: AddParticipantPayload,
@@ -118,7 +118,7 @@ const participantService = {
         return response.data.participant_id;
     },
 
-    // Update a participant's details
+    // update a participant's details
     updateParticipant: async (
         expenseId: string,
         username: string,
@@ -130,7 +130,7 @@ const participantService = {
         );
     },
 
-    // Remove a participant from an expense
+    // remove a participant from an expense
     removeParticipant: async (
         expenseId: string,
         username: string,
