@@ -7,7 +7,7 @@ from .models import init_app as init_db
 from .routes import init_app as init_routes
 
 
-def create_app(configs_dictionary_key="dev"):
+def create_app(configs_dictionary_key="prod"):
     app = Flask(__name__)
     app.config.from_object(configs_dictionary[configs_dictionary_key])
 
