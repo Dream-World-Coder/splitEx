@@ -44,7 +44,9 @@ export const Header: React.FC = () => {
                             src="https://opencanvas.blog/defaults/profile_1.jpeg"
                             alt="@user"
                         />
-                        <AvatarFallback>SG</AvatarFallback>
+                        <AvatarFallback>
+                            {currentUser.name.slice(0, 2)}
+                        </AvatarFallback>
                     </Avatar>
                 ) : (
                     <div
