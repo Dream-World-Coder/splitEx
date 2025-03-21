@@ -42,8 +42,7 @@ const App: React.FC = () => {
                         <Route path="/profile" element={<Profile />} />
                     </Route>
 
-                    {/* <Route path="/calculate-expense" element={<CalculateExpense />} />
-                <Route path="/groups" element={<Groups />} />
+                    {/* <Route path="/groups" element={<Groups />} />
                 <Route path="/scan-from-other-apps" element={<ScanFromOtherApps />} />  */}
                 </Routes>
             </AuthProvider>
