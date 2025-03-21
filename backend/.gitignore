@@ -1,0 +1,10 @@
+.venv
+__pycache__
+.ropeproject
+.env
+backup*
+instance
+*.sqlite
+*.db
+*.sqlite3
+*.bson
