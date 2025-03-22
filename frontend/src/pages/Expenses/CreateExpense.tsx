@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+// import { useAuth } from "@/contexts/AuthContext";
 import dataService, {
     SplitMethod,
     Participant,
@@ -66,7 +66,7 @@ const CreateEditExpense: React.FC = () => {
         amount: "",
     });
 
-    // Fetch expense data if editing
+    // fetch expense data if editing
     useEffect(() => {
         if (mode === "edit" && expenseId) {
             fetchExpenseData(expenseId);
@@ -82,9 +82,11 @@ const CreateEditExpense: React.FC = () => {
             setTotalAmount(expense.total_amount.toString());
             setSplitMode(expense.split_method);
 
-            // Extract participants for equal split
+            // extract participants for equal split
             if (expense.split_method === SplitMethod.EQUAL) {
-                setParticipants(expense.participants.map((p) => p.username));
+                setParticipants(
+                    expense.participants.map((p) => p.username.toLowerCase()),
+                );
             } else {
                 setParticipantEntries(expense.participants);
             }
@@ -142,7 +144,7 @@ const CreateEditExpense: React.FC = () => {
             setParticipantEntries((prev) => [
                 ...prev,
                 {
-                    username: newEntry.username,
+                    username: newEntry.username.toLowerCase(),
                     item:
                         splitMode === SplitMethod.EQUAL
                             ? "Equal share"
@@ -208,11 +210,11 @@ const CreateEditExpense: React.FC = () => {
             };
 
             if (mode === "create") {
-                // Create new expense
+                // create new expense
                 const newExpenseId =
                     await dataService.expenses.createExpense(expenseData);
 
-                // Add participants
+                // add participants
                 if (splitMode === SplitMethod.EQUAL) {
                     const perPersonAmount = expenseTotal / participants.length;
 
@@ -228,12 +230,12 @@ const CreateEditExpense: React.FC = () => {
                         );
                     }
                 } else {
-                    // Add custom entries
+                    // add custom entries
                     for (const entry of participantEntries) {
                         await dataService.participants.addParticipant(
                             newExpenseId,
                             {
-                                username: entry.username,
+                                username: entry.username.toLowerCase(),
                                 amount: entry.amount,
                                 item: entry.item,
                             },
@@ -243,13 +245,13 @@ const CreateEditExpense: React.FC = () => {
 
                 toast.success("Expense created successfully");
             } else if (expenseId) {
-                // Update existing expense
+                // update existing expense
                 await dataService.expenses.updateExpense(
                     expenseId,
                     expenseData,
                 );
 
-                // Get current participants to compare
+                // get current participants to compare
                 const currentParticipants =
                     await dataService.participants.getExpenseParticipants(
                         expenseId,
@@ -258,24 +260,28 @@ const CreateEditExpense: React.FC = () => {
                 if (splitMode === SplitMethod.EQUAL) {
                     const perPersonAmount = expenseTotal / participants.length;
 
-                    // Remove participants who are no longer included
+                    // remove participants who are no longer included
                     for (const participant of currentParticipants) {
-                        if (!participants.includes(participant.username)) {
+                        if (
+                            !participants.includes(
+                                participant.username.toLowerCase(),
+                            )
+                        ) {
                             await dataService.participants.removeParticipant(
                                 expenseId,
-                                participant.username,
+                                participant.username.toLowerCase(),
                             );
                         }
                     }
 
-                    // Add or update remaining participants
+                    // add or update remaining participants
                     for (const username of participants) {
                         const existing = currentParticipants.find(
-                            (p) => p.username === username,
+                            (p) => p.username === username.toLowerCase(),
                         );
 
                         if (existing) {
-                            // Update amount
+                            // update amount
                             await dataService.participants.updateParticipant(
                                 expenseId,
                                 username,
@@ -285,7 +291,7 @@ const CreateEditExpense: React.FC = () => {
                                 },
                             );
                         } else {
-                            // Add new participant
+                            // add new participant
                             await dataService.participants.addParticipant(
                                 expenseId,
                                 {
@@ -297,21 +303,21 @@ const CreateEditExpense: React.FC = () => {
                         }
                     }
                 } else {
-                    // For custom split, replace all participants
-                    // First remove all existing participants
+                    // for custom split, replace all participants
+                    // first remove all existing participants
                     for (const participant of currentParticipants) {
                         await dataService.participants.removeParticipant(
                             expenseId,
-                            participant.username,
+                            participant.username.toLowerCase(),
                         );
                     }
 
-                    // Then add all new entries
+                    // then add all new entries
                     for (const entry of participantEntries) {
                         await dataService.participants.addParticipant(
                             expenseId,
                             {
-                                username: entry.username,
+                                username: entry.username.toLowerCase(),
                                 amount: entry.amount,
                                 item: entry.item,
                             },
@@ -533,9 +539,7 @@ const CreateEditExpense: React.FC = () => {
                                                                 key={index}
                                                             >
                                                                 <TableCell className="py-2">
-                                                                    {
-                                                                        entry.username
-                                                                    }
+                                                                    {entry.username.toLowerCase()}
                                                                 </TableCell>
                                                                 <TableCell className="py-2">
                                                                     {entry.item}
@@ -579,7 +583,7 @@ const CreateEditExpense: React.FC = () => {
                                     <div className="flex gap-2 pt-2">
                                         <Input
                                             placeholder="Person"
-                                            value={newEntry.username}
+                                            value={newEntry.username.toLowerCase()}
                                             onChange={(e) =>
                                                 setNewEntry({
                                                     ...newEntry,
