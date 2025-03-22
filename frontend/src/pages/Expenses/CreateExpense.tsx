@@ -565,10 +565,10 @@ const CreateEditExpense: React.FC = () => {
                                         <div className="flex gap-2">
                                             <Input
                                                 placeholder="Add participant [username]"
-                                                value={newUsername}
+                                                value={newUsername.toLowerCase()}
                                                 onChange={(e) =>
                                                     setNewUsername(
-                                                        e.target.value,
+                                                        e.target.value.toLowerCase(),
                                                     )
                                                 }
                                                 className="flex-1"
