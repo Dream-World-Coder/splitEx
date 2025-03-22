@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-// import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import dataService, {
     SplitMethod,
     Participant,
@@ -45,7 +45,7 @@ interface NewParticipantEntry {
 const CreateEditExpense: React.FC = () => {
     const navigate = useNavigate();
     const { expenseId } = useParams<{ expenseId: string }>();
-    // const { currentUser } = useAuth();
+    const { currentUser } = useAuth();
     const mode = expenseId ? "edit" : "create";
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -481,7 +481,7 @@ const CreateEditExpense: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Basic Info */}
+                            {/* basic Info */}
                             <div className="space-y-2">
                                 <Label htmlFor="title">Title</Label>
                                 <Input
@@ -502,7 +502,7 @@ const CreateEditExpense: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Split Mode Selection */}
+                            {/* split mode selection */}
                             <div className="space-y-2">
                                 <Label htmlFor="splitMode">Split Method</Label>
                                 <Select
@@ -523,7 +523,7 @@ const CreateEditExpense: React.FC = () => {
                                 </Select>
                             </div>
 
-                            {/* Equal Split UI */}
+                            {/* equal split */}
                             {splitMode === SplitMethod.EQUAL && (
                                 <div className="space-y-4">
                                     <div className="space-y-2">
@@ -538,6 +538,19 @@ const CreateEditExpense: React.FC = () => {
                                             onChange={(e) =>
                                                 setTotalAmount(e.target.value)
                                             }
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="paidBy">Paid By</Label>
+                                        <Input
+                                            id="paidBy"
+                                            type="string"
+                                            disabled
+                                            value={currentUser?.username}
+                                            // onChange={(e) =>
+                                            //     setTotalAmount(e.target.value)
+                                            // }
                                         />
                                     </div>
 
@@ -564,7 +577,7 @@ const CreateEditExpense: React.FC = () => {
 
                                         <div className="flex gap-2">
                                             <Input
-                                                placeholder="Add participant [username]"
+                                                placeholder="Add usernames, you are auto added"
                                                 value={newUsername.toLowerCase()}
                                                 onChange={(e) =>
                                                     setNewUsername(
@@ -615,9 +628,22 @@ const CreateEditExpense: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Custom Split UI */}
+                            {/* custom split */}
                             {splitMode === SplitMethod.UNEQUAL && (
                                 <div className="space-y-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="paidBy">Paid By</Label>
+                                        <Input
+                                            id="paidBy"
+                                            type="string"
+                                            disabled
+                                            value={currentUser?.username}
+                                            // onChange={(e) =>
+                                            //     setTotalAmount(e.target.value)
+                                            // }
+                                        />
+                                    </div>
+
                                     <div className="flex justify-between items-center">
                                         <Label>Expense Items</Label>
                                         <Badge

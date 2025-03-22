@@ -6,6 +6,7 @@ import AuthProvider from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
 
 import HomePage from "./pages/Home/HomePage";
+import ExpenseViewOthers from "./pages/Home/ShowOthersExpenses";
 import CreateEditExpense from "./pages/Expenses/CreateExpense";
 import ViewExpense from "./pages/Expenses/ViewExpense";
 
@@ -31,6 +32,10 @@ const App: React.FC = () => {
                     <Route element={<ProtectedRoute />}>
                         <Route path="/home" element={<HomePage />} />
                         <Route path="/expenses" element={<HomePage />} />
+                        <Route
+                            path="/expenses/:username"
+                            element={<ExpenseViewOthers />}
+                        />
                         <Route
                             path="/create-expense"
                             element={<CreateEditExpense />}

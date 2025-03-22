@@ -47,7 +47,7 @@ def create_expense():
         # calculate default amount for equal split (just the user for now)
         default_amount = data['total_amount']
 
-        # Add the current user as a participant
+        # add the current user as a participant
         participant = ExpenseParticipant(
             expense_id=new_expense.id,
             user_id=uuid.UUID(user_id),
@@ -180,16 +180,14 @@ def update_expense(expense_id):
     data = request.get_json()
 
     try:
-        # Get the expense
         expense = Expense.query.get(uuid.UUID(expense_id))
         if not expense:
             return jsonify({'error': 'Expense not found'}), 404
 
-        # Check if current user is the payer
+        # check: current user is the payer
         if str(expense.payer_id) != user_id:
             return jsonify({'error': 'Only the payer can update this expense'}), 403
 
-        # Update allowed fields
         if 'title' in data:
             expense.title = data['title']
 
@@ -202,7 +200,7 @@ def update_expense(expense_id):
         if 'split_method' in data:
             expense.split_method = SplitMethod.UNEQUAL if data['split_method'] == 'unequal' else SplitMethod.EQUAL
 
-        # Update the expense
+        # update the expense
         expense.updated_at = datetime.utcnow()
         db.session.commit()
 
@@ -220,16 +218,15 @@ def delete_expense(expense_id):
     user_id = get_jwt_identity()
 
     try:
-        # Get the expense
         expense = Expense.query.get(uuid.UUID(expense_id))
         if not expense:
             return jsonify({'error': 'Expense not found'}), 404
 
-        # Check if current user is the payer
+        # payer check
         if str(expense.payer_id) != user_id:
             return jsonify({'error': 'Only the payer can delete this expense'}), 403
 
-        # Delete the expense
+        # Delete
         db.session.delete(expense)
         db.session.commit()
 

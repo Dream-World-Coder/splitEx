@@ -22,9 +22,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
-import dataService, { Expense, Participant } from "@/services/dataService";
+import dataService, {
+    Expense,
+    Participant,
+    SplitMethod,
+} from "@/services/dataService";
 import ShareExpenseReceipt from "@/components/ShareExpenseReceipt";
 import { Header, QuickStats, QuickOptions, BottomDrawer } from "./components";
+
+function areAllElementsPresent<T>(array: T[], elementsToCheck: T[]): boolean {
+    for (let i = 0; i < elementsToCheck.length; i++) {
+        let found = false;
+        for (let j = 0; j < array.length; j++) {
+            if (array[j] === elementsToCheck[i]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
+}
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -170,76 +190,175 @@ const HomePage: React.FC = () => {
                             </Button>
                         </div>
                     ) : (
-                        expenses.map((expense) => (
-                            <Card
-                                key={expense.id}
-                                className="w-full shadow-sm cursor-pointer"
-                                onClick={() =>
-                                    handleViewExpenseDetail(expense.id)
-                                }
-                            >
-                                <CardHeader className="pb-2">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <CardTitle>
-                                                {expense.title}
-                                            </CardTitle>
-                                            <CardDescription>
-                                                {new Date(
-                                                    expense.date,
-                                                ).toLocaleDateString()}
-                                            </CardDescription>
-                                        </div>
-                                        <div className="flex gap-1">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleShareReceipt(expense);
-                                                }}
-                                            >
-                                                <Share size={18} />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="pt-0">
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span className="font-medium">
-                                            Total:
-                                        </span>
-                                        <span className="font-bold">
-                                            ₹{expense.total_amount.toFixed(2)}
-                                        </span>
-                                    </div>
-                                    {expense.paid_by && (
-                                        <div className="text-sm mb-2 text-gray-600">
-                                            Paid by: {expense.paid_by}
-                                        </div>
-                                    )}
-                                    <div className="space-y-1">
-                                        {getUniquePersons(
-                                            expense.participants,
-                                        ).map((username) => (
-                                            <div
-                                                key={username}
-                                                className="flex justify-between text-sm"
-                                            >
-                                                <span>{username}</span>
-                                                <span>
-                                                    ₹
-                                                    {calculatePersonTotal(
-                                                        expense.participants,
-                                                        username,
-                                                    ).toFixed(2)}
-                                                </span>
+                        expenses.map((expense) => {
+                            return expense.split_method ===
+                                SplitMethod.EQUAL ? (
+                                <Card
+                                    key={expense.id}
+                                    className="w-full shadow-sm cursor-pointer"
+                                    onClick={() =>
+                                        handleViewExpenseDetail(expense.id)
+                                    }
+                                >
+                                    <CardHeader className="pb-2">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <CardTitle>
+                                                    {expense.title}
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    {new Date(
+                                                        expense.date,
+                                                    ).toLocaleDateString()}
+                                                </CardDescription>
                                             </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleShareReceipt(
+                                                            expense,
+                                                        );
+                                                    }}
+                                                >
+                                                    <Share size={18} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="pt-0">
+                                        <div className="flex justify-between text-sm mb-2">
+                                            <span className="font-medium">
+                                                Total:
+                                            </span>
+                                            <span className="font-bold">
+                                                ₹
+                                                {expense.total_amount.toFixed(
+                                                    2,
+                                                )}
+                                            </span>
+                                        </div>
+                                        {expense.paid_by && (
+                                            <div className="text-sm mb-2 text-gray-600">
+                                                Paid by: {expense.paid_by}
+                                            </div>
+                                        )}
+                                        <div className="space-y-1">
+                                            {getUniquePersons(
+                                                expense.participants,
+                                            ).map((username) => (
+                                                <div
+                                                    key={username}
+                                                    className="flex justify-between text-sm"
+                                                >
+                                                    <span>{username}</span>
+                                                    <span>
+                                                        ₹
+                                                        {calculatePersonTotal(
+                                                            expense.participants,
+                                                            username,
+                                                        ).toFixed(2)}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ) : (
+                                <Card
+                                    key={expense.id}
+                                    className="w-full shadow-sm cursor-pointer"
+                                    onClick={() =>
+                                        handleViewExpenseDetail(expense.id)
+                                    }
+                                >
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start">
+                                            <div className="">
+                                                <CardTitle>
+                                                    {expense?.title}
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    {expense?.date}
+                                                </CardDescription>
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleShareReceipt(
+                                                            expense,
+                                                        );
+                                                    }}
+                                                >
+                                                    <Share size={18} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>
+                                                        Person
+                                                    </TableHead>
+                                                    <TableHead>
+                                                        {expense
+                                                            ?.participants[0]
+                                                            .item && "Item"}
+                                                    </TableHead>
+                                                    <TableHead className="text-right">
+                                                        Amount
+                                                    </TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {expense?.participants?.map(
+                                                    (participant, index) => (
+                                                        <TableRow key={index}>
+                                                            <TableCell>
+                                                                {
+                                                                    participant.username
+                                                                }
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {participant.item &&
+                                                                    participant.item}
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                ₹
+                                                                {participant.amount.toFixed(
+                                                                    2,
+                                                                )}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ),
+                                                )}
+                                                <TableRow>
+                                                    <TableCell
+                                                        colSpan={2}
+                                                        className="font-bold"
+                                                    >
+                                                        Total
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-bold">
+                                                        ₹
+                                                        {calculateTotal(
+                                                            expense?.participants,
+                                                        ).toFixed(2)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        </Table>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })
                     )}
                 </TabsContent>
 
@@ -277,7 +396,31 @@ const HomePage: React.FC = () => {
                                                 ),
                                             ),
                                         ).map((username) => (
-                                            <TableRow key={username}>
+                                            <TableRow
+                                                key={username}
+                                                onClick={() => {
+                                                    navigate(
+                                                        `/expenses/${username}+${currentUser?.username}`,
+                                                        {
+                                                            state: expenses.filter(
+                                                                (expense) =>
+                                                                    areAllElementsPresent(
+                                                                        expense.participants.map(
+                                                                            (
+                                                                                participant,
+                                                                            ) =>
+                                                                                participant.username,
+                                                                        ),
+                                                                        [
+                                                                            currentUser?.username,
+                                                                            username,
+                                                                        ],
+                                                                    ),
+                                                            ),
+                                                        },
+                                                    );
+                                                }}
+                                            >
                                                 <TableCell>
                                                     {username}
                                                 </TableCell>
