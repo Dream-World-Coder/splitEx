@@ -58,7 +58,7 @@ export interface UpdateParticipantPayload {
     item?: string;
 }
 
-// Expense related functions
+// Expense related
 const expenseService = {
     // get all expenses for current user
     getAllExpenses: async (): Promise<Expense[]> => {

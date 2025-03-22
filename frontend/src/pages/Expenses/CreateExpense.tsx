@@ -98,16 +98,16 @@ const CreateEditExpense: React.FC = () => {
         }
     };
 
-    // Calculate total from entries
+    // calculate total from entries
     const calculateTotal = (entries: Participant[]): number => {
         if (!entries || entries.length === 0) return 0;
         return entries.reduce((sum, entry) => sum + entry.amount, 0);
     };
 
-    // Handle split mode change
+    // handle split mode change
     const handleSplitModeChange = (value: string) => {
         setSplitMode(value as SplitMethod);
-        // Reset related fields when changing split mode
+        // reset related fields when changing split mode
         if (value === SplitMethod.EQUAL) {
             setParticipantEntries([]);
         } else {
@@ -115,7 +115,7 @@ const CreateEditExpense: React.FC = () => {
         }
     };
 
-    // Add new participant for equal split
+    // add new participant for equal split
     const handleAddParticipant = () => {
         if (newUsername && !participants.includes(newUsername)) {
             setParticipants((prev) => [...prev, newUsername]);
@@ -123,12 +123,12 @@ const CreateEditExpense: React.FC = () => {
         }
     };
 
-    // Remove a participant from equal split
+    // remove a participant from equal split
     const handleRemoveParticipant = (index: number) => {
         setParticipants((prev) => prev.filter((_, i) => i !== index));
     };
 
-    // Add new entry for custom split
+    // add new entry for custom split
     const handleAddEntry = () => {
         if (
             newEntry.username &&
@@ -159,12 +159,12 @@ const CreateEditExpense: React.FC = () => {
         }
     };
 
-    // Remove an entry from custom split
+    // remove an entry from custom split
     const handleRemoveEntry = (index: number) => {
         setParticipantEntries((prev) => prev.filter((_, i) => i !== index));
     };
 
-    // Save the expense
+    // save the expense
     const handleSave = async () => {
         if (!title) {
             toast.error("Please enter a title for the expense");
@@ -210,40 +210,80 @@ const CreateEditExpense: React.FC = () => {
             };
 
             if (mode === "create") {
-                // create new expense
-                const newExpenseId =
-                    await dataService.expenses.createExpense(expenseData);
+                try {
+                    // create new expense
+                    const newExpenseId =
+                        await dataService.expenses.createExpense(expenseData);
 
-                // add participants
-                if (splitMode === SplitMethod.EQUAL) {
-                    const perPersonAmount = expenseTotal / participants.length;
+                    // add participants
+                    if (splitMode === SplitMethod.EQUAL) {
+                        const perPersonAmount =
+                            expenseTotal / participants.length;
 
-                    // Add participants one by one
-                    for (const username of participants) {
-                        await dataService.participants.addParticipant(
-                            newExpenseId,
-                            {
-                                username,
-                                amount: perPersonAmount,
-                                item: "Equal share",
-                            },
-                        );
+                        // add participants one by one
+                        for (const username of participants) {
+                            try {
+                                await dataService.participants.addParticipant(
+                                    newExpenseId,
+                                    {
+                                        username,
+                                        amount: perPersonAmount,
+                                        item: "Equal share",
+                                    },
+                                );
+                            } catch (participantError) {
+                                // If adding a participant fails, delete the expense and stop
+                                console.error(
+                                    "Failed to add participant:",
+                                    participantError,
+                                );
+                                await dataService.expenses.deleteExpense(
+                                    newExpenseId,
+                                );
+                                toast.error(
+                                    `Failed to add participant ${username}. The expense has been deleted.`,
+                                );
+                                setIsLoading(false);
+                                return;
+                            }
+                        }
+                    } else {
+                        // add custom entries
+                        for (const entry of participantEntries) {
+                            try {
+                                await dataService.participants.addParticipant(
+                                    newExpenseId,
+                                    {
+                                        username: entry.username.toLowerCase(),
+                                        amount: entry.amount,
+                                        item: entry.item,
+                                    },
+                                );
+                            } catch (participantError) {
+                                // if adding a participant fails, delete the expense and stop
+                                console.error(
+                                    "Failed to add participant:",
+                                    participantError,
+                                );
+                                await dataService.expenses.deleteExpense(
+                                    newExpenseId,
+                                );
+                                toast.error(
+                                    `Failed to add participant ${entry.username}. The expense has been deleted.`,
+                                );
+                                setIsLoading(false);
+                                return;
+                            }
+                        }
                     }
-                } else {
-                    // add custom entries
-                    for (const entry of participantEntries) {
-                        await dataService.participants.addParticipant(
-                            newExpenseId,
-                            {
-                                username: entry.username.toLowerCase(),
-                                amount: entry.amount,
-                                item: entry.item,
-                            },
-                        );
-                    }
+
+                    toast.success("Expense created successfully");
+                } catch (expenseError) {
+                    console.error("Error creating expense:", expenseError);
+                    toast.error("Failed to create expense. Please try again.");
+                    setIsLoading(false);
+                    return;
                 }
-
-                toast.success("Expense created successfully");
             } else if (expenseId) {
                 // update existing expense
                 await dataService.expenses.updateExpense(
@@ -276,52 +316,128 @@ const CreateEditExpense: React.FC = () => {
 
                     // add or update remaining participants
                     for (const username of participants) {
-                        const existing = currentParticipants.find(
-                            (p) => p.username === username.toLowerCase(),
-                        );
+                        try {
+                            const existing = currentParticipants.find(
+                                (p) => p.username === username.toLowerCase(),
+                            );
 
-                        if (existing) {
-                            // update amount
-                            await dataService.participants.updateParticipant(
-                                expenseId,
-                                username,
-                                {
-                                    amount: perPersonAmount,
-                                    item: "Equal share",
-                                },
-                            );
-                        } else {
-                            // add new participant
-                            await dataService.participants.addParticipant(
-                                expenseId,
-                                {
+                            if (existing) {
+                                // update amount
+                                await dataService.participants.updateParticipant(
+                                    expenseId,
                                     username,
-                                    amount: perPersonAmount,
-                                    item: "Equal share",
-                                },
+                                    {
+                                        amount: perPersonAmount,
+                                        item: "Equal share",
+                                    },
+                                );
+                            } else {
+                                // add new participant
+                                await dataService.participants.addParticipant(
+                                    expenseId,
+                                    {
+                                        username,
+                                        amount: perPersonAmount,
+                                        item: "Equal share",
+                                    },
+                                );
+                            }
+                        } catch (participantError) {
+                            console.error(
+                                "Failed to add/update participant:",
+                                participantError,
                             );
+                            toast.error(
+                                `Failed to add/update participant ${username}. Please try again.`,
+                            );
+                            setIsLoading(false);
+                            return;
                         }
                     }
                 } else {
-                    // for custom split, replace all participants
-                    // first remove all existing participants
-                    for (const participant of currentParticipants) {
-                        await dataService.participants.removeParticipant(
-                            expenseId,
-                            participant.username.toLowerCase(),
-                        );
-                    }
+                    // For custom split, we'll use a transaction-like approach
+                    // First store all existing participants in case we need to restore them
+                    const backupParticipants = [...currentParticipants];
+                    let participantUpdateFailed = false;
 
-                    // then add all new entries
-                    for (const entry of participantEntries) {
-                        await dataService.participants.addParticipant(
-                            expenseId,
-                            {
-                                username: entry.username.toLowerCase(),
-                                amount: entry.amount,
-                                item: entry.item,
-                            },
+                    try {
+                        // Remove all existing participants
+                        for (const participant of currentParticipants) {
+                            await dataService.participants.removeParticipant(
+                                expenseId,
+                                participant.username.toLowerCase(),
+                            );
+                        }
+
+                        // Add all new entries
+                        for (const entry of participantEntries) {
+                            try {
+                                await dataService.participants.addParticipant(
+                                    expenseId,
+                                    {
+                                        username: entry.username.toLowerCase(),
+                                        amount: entry.amount,
+                                        item: entry.item,
+                                    },
+                                );
+                            } catch (error) {
+                                participantUpdateFailed = true;
+                                throw error; // Propagate to the catch block
+                            }
+                        }
+                    } catch (error) {
+                        console.error(
+                            "Failed during participant updates:",
+                            error,
                         );
+
+                        if (participantUpdateFailed) {
+                            // Try to restore original participants
+                            try {
+                                // First remove any participants that might have been added
+                                const currentList =
+                                    await dataService.participants.getExpenseParticipants(
+                                        expenseId,
+                                    );
+                                for (const participant of currentList) {
+                                    await dataService.participants.removeParticipant(
+                                        expenseId,
+                                        participant.username.toLowerCase(),
+                                    );
+                                }
+
+                                // Restore original participants
+                                for (const participant of backupParticipants) {
+                                    await dataService.participants.addParticipant(
+                                        expenseId,
+                                        {
+                                            username:
+                                                participant.username.toLowerCase(),
+                                            amount: participant.amount,
+                                            item: participant.item,
+                                        },
+                                    );
+                                }
+                                toast.error(
+                                    "Failed to update participants. Original expense has been restored.",
+                                );
+                            } catch (restoreError) {
+                                console.error(
+                                    "Failed to restore original participants:",
+                                    restoreError,
+                                );
+                                // If restoring fails, delete the expense as a last resort
+                                await dataService.expenses.deleteExpense(
+                                    expenseId,
+                                );
+                                toast.error(
+                                    "Failed to update participants. The expense has been deleted to maintain data integrity.",
+                                );
+                            }
+                        }
+
+                        setIsLoading(false);
+                        return;
                     }
                 }
 
