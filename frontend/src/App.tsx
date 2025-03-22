@@ -36,6 +36,10 @@ const App: React.FC = () => {
                             element={<CreateEditExpense />}
                         />
                         <Route
+                            path="/expense/edit/:expenseId"
+                            element={<CreateEditExpense />}
+                        />
+                        <Route
                             path="/expense/:expenseId"
                             element={<ViewExpense />}
                         />

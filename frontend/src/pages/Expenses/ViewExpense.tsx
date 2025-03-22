@@ -63,10 +63,9 @@ const ViewExpense = () => {
     };
 
     const handleEditExpense = () => {
-        // if (expense) {
-        //     navigate(`/expense/edit/${expense.id}`);
-        // }
-        alert("will be added later");
+        if (expense) {
+            navigate(`/expense/edit/${expense.id}`);
+        }
     };
 
     const handleDeleteExpense = async () => {

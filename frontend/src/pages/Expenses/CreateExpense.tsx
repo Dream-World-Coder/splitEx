@@ -355,13 +355,13 @@ const CreateEditExpense: React.FC = () => {
                         }
                     }
                 } else {
-                    // For custom split, we'll use a transaction-like approach
-                    // First store all existing participants in case we need to restore them
+                    // for custom split, we'll use a transaction-like approach
+                    // first store all existing participants in case we need to restore them
                     const backupParticipants = [...currentParticipants];
                     let participantUpdateFailed = false;
 
                     try {
-                        // Remove all existing participants
+                        // remove all existing participants
                         for (const participant of currentParticipants) {
                             await dataService.participants.removeParticipant(
                                 expenseId,
@@ -369,7 +369,7 @@ const CreateEditExpense: React.FC = () => {
                             );
                         }
 
-                        // Add all new entries
+                        // add all new entries
                         for (const entry of participantEntries) {
                             try {
                                 await dataService.participants.addParticipant(
@@ -392,9 +392,9 @@ const CreateEditExpense: React.FC = () => {
                         );
 
                         if (participantUpdateFailed) {
-                            // Try to restore original participants
+                            // try to restore original participants
                             try {
-                                // First remove any participants that might have been added
+                                // first remove any participants that might have been added
                                 const currentList =
                                     await dataService.participants.getExpenseParticipants(
                                         expenseId,
@@ -406,7 +406,7 @@ const CreateEditExpense: React.FC = () => {
                                     );
                                 }
 
-                                // Restore original participants
+                                // restore original participants
                                 for (const participant of backupParticipants) {
                                     await dataService.participants.addParticipant(
                                         expenseId,
@@ -426,7 +426,7 @@ const CreateEditExpense: React.FC = () => {
                                     "Failed to restore original participants:",
                                     restoreError,
                                 );
-                                // If restoring fails, delete the expense as a last resort
+                                // if restoring fails, delete the expense as a last resort
                                 await dataService.expenses.deleteExpense(
                                     expenseId,
                                 );
