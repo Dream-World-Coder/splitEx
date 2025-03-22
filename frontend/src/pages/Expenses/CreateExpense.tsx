@@ -172,9 +172,9 @@ const CreateEditExpense: React.FC = () => {
         }
 
         if (splitMode === SplitMethod.EQUAL) {
-            if (participants.length < 2) {
+            if (participants.length < 1) {
                 toast.error(
-                    "Please add at least 2 participants for equal splitting",
+                    "Please add at least 1 participant for equal splitting",
                 );
                 return;
             }
